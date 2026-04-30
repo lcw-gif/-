@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitives
+    function isSignedIn() {
+      return request.auth != null && 
+             request.auth.token.email.endsWith('@lstlkkc.edu.hk') &&
+             request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // Phase 4: Validation Blueprints
+    function isValidReservation(data) {
+      let requiredFields = ['date', 'type', 'customType', 'teacher', 'content', 'duration', 'teacherEmail', 'createdAt', 'updatedAt'];
+      return data.keys().hasAll(requiredFields) &&
+             data.keys().size() == requiredFields.size() &&
+             data.date is string && data.date.matches('^\\d{4}-\\d{2}-\\d{2}$') &&
+             data.type in ['宣傳', '宣佈', '短講', '頒獎', '其他'] &&
+             data.customType is string && data.customType.size() <= 100 &&
+             data.teacher is string && data.teacher.size() >= 2 && data.teacher.size() <= 100 &&
+             data.content is string && data.content.size() >= 2 && data.content.size() <= 2000 &&
+             data.duration is int && data.duration >= 0 && data.duration <= 25 &&
+             data.teacherEmail == request.auth.token.email &&
+             data.createdAt == request.time &&
+             data.updatedAt == request.time &&
+             (data.type != '其他' || (data.customType != ''));
+    }
+
+    match /reservations/{reservationId} {
+      allow list: if isSignedIn();
+      allow get: if isSignedIn();
+      
+      allow create: if isSignedIn() && 
+                    isValidId(reservationId) && 
+                    isValidReservation(incoming());
+                    
+      allow delete: if isSignedIn() && 
+                    existing().teacherEmail == request.auth.token.email;
+    }
+  }
+}

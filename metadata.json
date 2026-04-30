@@ -1,0 +1,6 @@
+{
+  "name": "校園電視台早會宣佈預約系統",
+  "description": "Campus TV Morning Assembly Announcement Booking System for LSTLKKC. Includes calendar selection, daily time limits, and domain-restricted authentication.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

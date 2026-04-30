@@ -1,0 +1,56 @@
+{
+  "entities": {
+    "Reservation": {
+      "title": "Reservation",
+      "description": "A booking for a morning assembly announcement.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "The date of the assembly (YYYY-MM-DD)."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["宣傳", "宣佈", "短講", "頒獎", "其他"],
+          "description": "The category of the announcement."
+        },
+        "customType": {
+          "type": "string",
+          "description": "Specified description if type is '其他'."
+        },
+        "teacher": {
+          "type": "string",
+          "description": "The name of the responsible teacher."
+        },
+        "content": {
+          "type": "string",
+          "description": "The content of the announcement."
+        },
+        "duration": {
+          "type": "number",
+          "description": "Duration in minutes. Only required for Tue, Wed, Fri."
+        },
+        "teacherEmail": {
+          "type": "string",
+          "description": "The email of the teacher who created the booking."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["date", "type", "teacher", "content", "teacherEmail", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/reservations/{reservationId}": {
+      "schema": "Reservation",
+      "description": "Collection of all assembly bookings."
+    }
+  }
+}
